@@ -40,9 +40,11 @@ export interface IResume{
     summary: string;
     personalInfo: IPersonalInfo;
     workExperience?: IWorkExperience[];
+    skills: string[];
     projects: IProjects[];
     education: IEducation[];
     certifications?: string[];
-   
+    createdAt?: Date;
+    updatedAt?: Date;
 
 }
