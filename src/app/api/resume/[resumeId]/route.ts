@@ -8,11 +8,11 @@ export async function GET (req: NextRequest, {params}: {params: Promise<{resumeI
     try {
         await connectToDB();
 
-        const user = await getCurrentUser();
+        const userId = await getCurrentUser();
 
         const {resumeId} = await params;
 
-        const resume = await resumeModel.findOne({_id: resumeId, user_id: user.userId});
+        const resume = await resumeModel.findOne({_id: resumeId, user_id: userId});
 
         if(!resume) return NextResponse.json<APIResponse>({
             success: false,
@@ -42,7 +42,7 @@ export async function PATCH (req: NextRequest, {params}: {params: Promise<{resum
     try {
         await connectToDB();
 
-        const user = await getCurrentUser();
+        const userId = await getCurrentUser();
 
         const body = await req.json();
 
@@ -50,7 +50,7 @@ export async function PATCH (req: NextRequest, {params}: {params: Promise<{resum
 
         const updatedResume = await resumeModel.findOneAndUpdate({
             _id: resumeId,
-            user_id: user.userId
+            user_id: userId
         }, {
             $set: body,
         }, {

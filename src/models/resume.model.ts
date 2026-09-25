@@ -6,16 +6,29 @@ const resumeSchema = new mongoose.Schema<IResume>(
     user_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "user",
-      required: true
+      required: true,
     },
+
     title: {
       type: String,
       default: "",
     },
+
+    jobTitle: {
+      type: String,
+      default: "",
+    },
+
+    experienceLevel: {
+      type: String,
+      default: "",
+    },
+
     summary: {
       type: String,
       default: "",
     },
+
     personalInfo: {
       type: {
         fullname: String,
@@ -26,8 +39,9 @@ const resumeSchema = new mongoose.Schema<IResume>(
         linkedIn: String,
         portfolio: String,
       },
-      default: {}
+      default: {},
     },
+
     workExperience: {
       type: [
         {
@@ -38,9 +52,9 @@ const resumeSchema = new mongoose.Schema<IResume>(
           description: String,
         },
       ],
-
       default: [],
     },
+
     projects: {
       type: [
         {
@@ -53,10 +67,12 @@ const resumeSchema = new mongoose.Schema<IResume>(
       ],
       default: [],
     },
+
     skills: {
       type: [String],
       default: [],
     },
+
     certifications: {
       type: [String],
       default: [],
@@ -71,14 +87,14 @@ const resumeSchema = new mongoose.Schema<IResume>(
           endDate: String,
         },
       ],
-
-      default: []
+      default: [],
     },
   },
   { timestamps: true }
 );
 
-
-const resumeModel = mongoose.model('resume', resumeSchema);
+const resumeModel =
+  mongoose.models.resume ||
+  mongoose.model("resume", resumeSchema);
 
 export default resumeModel;

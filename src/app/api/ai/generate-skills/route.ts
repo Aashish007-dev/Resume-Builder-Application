@@ -1,22 +1,49 @@
 import { generateAIContent } from "@/lib/gemini";
-import { GenerateSkillsBody } from "@/types/ai.types";
+import { connectToDB } from "@/lib/mongodb";
+import resumeModel from "@/models/resume.model";
 import { APIResponse } from "@/types/api.types";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   try {
-    const body: GenerateSkillsBody = await req.json();
+    await connectToDB();
 
-    const { experienceLevel, jobTitle } = body;
+    const { resumeId } = await req.json();
 
-    if (!experienceLevel || !jobTitle)
+    if (!resumeId) {
       return NextResponse.json<APIResponse>(
         {
           success: false,
-          message: "Missing fields",
+          message: "Resume ID is required",
         },
-        { status: 400 },
+        { status: 400 }
       );
+    }
+
+    const resume = await resumeModel.findById(resumeId);
+
+    if (!resume) {
+      return NextResponse.json<APIResponse>(
+        {
+          success: false,
+          message: "Resume not found",
+        },
+        { status: 404 }
+      );
+    }
+
+    const { experienceLevel, jobTitle } = resume;
+
+    if (!experienceLevel || !jobTitle) {
+      return NextResponse.json<APIResponse>(
+        {
+          success: false,
+          message:
+            "Job title and experience level are required",
+        },
+        { status: 400 }
+      );
+    }
 
     const prompt = `
 You are an expert technical recruiter who specializes in ATS-optimized resumes.
@@ -41,35 +68,35 @@ EXAMPLE OUTPUT:
 ["JavaScript", "React.js", "Node.js", "MongoDB"]
 `;
 
+    const result = await generateAIContent(prompt);
 
-      const result = await generateAIContent(prompt);
+    let skills = result;
 
-      let skills = result;
-
-      if(typeof skills === "string"){
-        try {
-            skills = JSON.parse(skills);
-        } catch (error) {
-            console.log("Failed to parse skills: ", error)
-        }
+    if (typeof skills === "string") {
+      try {
+        skills = JSON.parse(skills);
+      } catch (error) {
+        console.log("Failed to parse skills:", error);
       }
-      
+    }
 
-      return NextResponse.json<APIResponse>({
+    return NextResponse.json<APIResponse>(
+      {
         success: true,
         message: "Skills created",
-        data: {skills}
-      }, {status: 201})
-
-
+        data: { skills },
+      },
+      { status: 201 }
+    );
   } catch (error) {
-    console.log("Error in Generate skills Api", error);
+    console.log("Error in Generate skills API:", error);
+
     return NextResponse.json<APIResponse>(
       {
         success: false,
         message: "Something went wrong",
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
